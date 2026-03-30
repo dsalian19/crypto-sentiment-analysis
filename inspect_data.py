@@ -29,8 +29,10 @@ def inspect_data(filepath: str = "data/tweets_raw.csv") -> None:
     for i, col in enumerate(df.columns, 1):
         print(f"  {i}. {col}")
 
-    print(f"\nFirst 5 Rows:")
-    print(df.head())
+    print(f"\nFirst 5 Rows (text truncated):")
+    for i in range(min(5, len(df))):
+        text = str(df.iloc[i]['text'])[:80].encode('ascii', 'ignore').decode('ascii')
+        print(f"  Row {i+1}: {text}...")
 
     print(f"\nData Types:")
     print(df.dtypes)

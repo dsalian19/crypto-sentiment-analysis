@@ -23,7 +23,7 @@ def export_for_labeling():
         print("Error: 'text' column not found in dataset")
         return
 
-    sample_size = min(500, len(df))
+    sample_size = min(1000, len(df))
 
     if sample_size < len(df):
         print(f"Sampling {sample_size} tweets (random_state=42)...")

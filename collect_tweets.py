@@ -1,7 +1,7 @@
 """Collect tweets from Twitter/X API using Tweepy."""
 
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 from dotenv import load_dotenv
@@ -9,7 +9,7 @@ import tweepy
 
 
 def collect_tweets():
-    """Collect tweets about Bitcoin and Ethereum using Twitter API v2."""
+    """Collect tweets about Bitcoin using Twitter API v2 - 100 per day for last 40 days."""
     load_dotenv()
 
     bearer_token = os.getenv("TWITTER_BEARER_TOKEN")
@@ -18,42 +18,56 @@ def collect_tweets():
 
     client = tweepy.Client(bearer_token=bearer_token, wait_on_rate_limit=True)
 
-    query = "(Bitcoin OR BTC OR Ethereum OR ETH) lang:en -is:retweet"
+    # Query excludes: retweets, replies, and quote tweets
+    # Note: Promoted tweets are not returned by the standard search API
+    query = "(Bitcoin OR BTC) lang:en -is:retweet -is:reply -is:quote"
 
     tweets_data = []
 
-    max_results = 500
-    batch_size = 100
+    end_date = datetime.now(timezone.utc)
+    start_date = end_date - timedelta(days=40)
 
-    print(f"Collecting tweets with query: {query}")
-    print(f"Target: up to {max_results} tweets")
+    print(f"Collecting tweets from {start_date.date()} to {end_date.date()}")
+    print(f"Target: 100 tweets per day x 40 days = 4000 tweets")
+    print(f"Query: {query}")
+    print("=" * 60)
 
-    paginator = tweepy.Paginator(
-        client.search_recent_tweets,
-        query=query,
-        tweet_fields=["created_at", "public_metrics"],
-        max_results=100,
-        limit=5
-    )
+    for day in range(40):
+        day_start = start_date + timedelta(days=day)
+        day_end = day_start + timedelta(days=1)
 
-    for response in paginator:
-        if response.data:
-            for tweet in response.data:
-                metrics = tweet.public_metrics
-                tweets_data.append({
-                    "text": tweet.text,
-                    "created_at": tweet.created_at,
-                    "author_id": tweet.author_id,
-                    "like_count": metrics.get("like_count", 0),
-                    "retweet_count": metrics.get("retweet_count", 0),
-                    "reply_count": metrics.get("reply_count", 0),
-                })
+        day_start_str = day_start.strftime("%Y-%m-%d")
 
-            print(f"  Collected {len(tweets_data)} tweets so far...")
+        print(f"Day {day + 1}/40: {day_start_str} ...", end=" ")
 
-            if len(tweets_data) >= max_results:
-                tweets_data = tweets_data[:max_results]
-                break
+        try:
+            response = client.search_all_tweets(
+                query=query,
+                tweet_fields=["created_at", "public_metrics"],
+                max_results=100,
+                start_time=day_start,
+                end_time=day_end
+            )
+
+            if response.data:
+                for tweet in response.data:
+                    metrics = tweet.public_metrics
+                    tweets_data.append({
+                        "text": tweet.text,
+                        "created_at": tweet.created_at,
+                        "author_id": tweet.author_id,
+                        "like_count": metrics.get("like_count", 0),
+                        "retweet_count": metrics.get("retweet_count", 0),
+                        "reply_count": metrics.get("reply_count", 0),
+                    })
+                print(f"Collected {len(response.data)} tweets")
+            else:
+                print("No tweets found")
+
+        except Exception as e:
+            print(f"Error: {e}")
+
+    print("=" * 60)
 
     if not tweets_data:
         print("No tweets collected.")
@@ -65,8 +79,8 @@ def collect_tweets():
     output_path = "data/tweets_raw.csv"
     df.to_csv(output_path, index=False)
 
-    print(f"\n✅ Saved {len(df)} tweets to {output_path}")
-    print(f"📊 Shape: {df.shape}")
+    print(f"\n[SUCCESS] Saved {len(df)} tweets to {output_path}")
+    print(f"Shape: {df.shape}")
 
 
 if __name__ == "__main__":

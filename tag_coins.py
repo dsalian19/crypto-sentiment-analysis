@@ -1,10 +1,10 @@
-"""Tag tweets with the cryptocurrency mentioned."""
+"""Tag tweets as Bitcoin-related or not."""
 
 import pandas as pd
 
 
 def tag_coins():
-    """Load tweets and tag with coin type based on text content."""
+    """Load tweets and tag as BTC or other based on text content."""
     input_path = "data/tweets_vader.csv"
     output_path = "data/tweets_tagged.csv"
 
@@ -26,21 +26,15 @@ def tag_coins():
         combined_text = text + " " + original_text
 
         btc_keywords = ["bitcoin", "btc"]
-        eth_keywords = ["ethereum", "eth"]
 
         has_btc = any(kw in combined_text for kw in btc_keywords)
-        has_eth = any(kw in combined_text for kw in eth_keywords)
 
-        if has_btc and has_eth:
-            return "BTC_ETH"
-        elif has_btc:
+        if has_btc:
             return "BTC"
-        elif has_eth:
-            return "ETH"
         else:
             return "other"
 
-    print("Tagging tweets by cryptocurrency...")
+    print("Tagging tweets as BTC or other...")
     df["coin"] = df.apply(categorize_coin, axis=1)
 
     df.to_csv(output_path, index=False)

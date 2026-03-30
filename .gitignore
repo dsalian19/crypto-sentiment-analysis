@@ -10,7 +10,6 @@ __pycache__/
 .DS_Store
 
 # Data and model files
-data/
 models/
 
 # Jupyter Notebook checkpoints
