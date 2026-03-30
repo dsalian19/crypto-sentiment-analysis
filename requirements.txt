@@ -1,0 +1,13 @@
+pandas
+numpy
+tweepy
+python-dotenv
+vaderSentiment
+transformers
+torch
+yfinance
+plotly
+streamlit
+scikit-learn
+datasets
+tqdm
