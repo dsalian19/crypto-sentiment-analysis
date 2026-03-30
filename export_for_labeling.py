@@ -32,11 +32,9 @@ def export_for_labeling():
         print(f"Using all {sample_size} tweets (less than 500)")
         df_sample = df.copy()
 
-    if "id" in df_sample.columns:
-        df_export = df_sample[["id", "text"]].copy()
-    else:
-        df_export = df_sample[["text"]].copy()
-        df_export.insert(0, "id", range(1, len(df_export) + 1))
+    # Use original index as ID to enable proper merging later
+    df_export = df_sample[["text"]].copy()
+    df_export.insert(0, "id", df_sample.index)
 
     df_export["label"] = ""
 
