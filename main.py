@@ -2,6 +2,8 @@
 
 import sys
 
+from collect_tweets import collect_tweets
+from preprocess import preprocess_data
 from clean_text import clean_and_save
 from vader_sentiment import analyze_sentiment
 from tag_coins import tag_coins
@@ -12,11 +14,13 @@ from merge_labels import merge_labels
 def run_pipeline():
     """Execute the full pipeline in order."""
     steps = [
-        ("Step 1: Cleaning tweet text...", clean_and_save),
-        ("Step 2: Running VADER sentiment analysis...", analyze_sentiment),
-        ("Step 3: Tagging tweets by cryptocurrency...", tag_coins),
-        ("Step 4: Exporting sample for manual labeling...", export_for_labeling),
-        ("Step 5: Merging manual labels back into dataset...", merge_labels),
+        ("Step 1: Collecting tweets from Twitter API...", collect_tweets),
+        ("Step 2: Preprocessing tweet data...", preprocess_data),
+        ("Step 3: Cleaning tweet text...", clean_and_save),
+        ("Step 4: Running VADER sentiment analysis...", analyze_sentiment),
+        ("Step 5: Tagging tweets by cryptocurrency...", tag_coins),
+        ("Step 6: Exporting sample for manual labeling...", export_for_labeling),
+        ("Step 7: Merging manual labels back into dataset...", merge_labels),
     ]
 
     for step_name, step_func in steps:
