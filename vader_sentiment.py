@@ -1,11 +1,8 @@
-"""Apply VADER sentiment analysis to cleaned tweets."""
-
 import pandas as pd
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
 def analyze_sentiment():
-    """Load cleaned tweets, apply VADER sentiment, and save results."""
     input_path = "data/tweets_cleaned.csv"
     output_path = "data/tweets_vader.csv"
 

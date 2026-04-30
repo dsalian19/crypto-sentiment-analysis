@@ -1,10 +1,7 @@
-"""Tag tweets as Bitcoin-related or not."""
-
 import pandas as pd
 
 
 def tag_coins():
-    """Load tweets and tag as BTC or other based on text content."""
     input_path = "data/tweets_vader.csv"
     output_path = "data/tweets_tagged.csv"
 

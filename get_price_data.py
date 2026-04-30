@@ -1,15 +1,8 @@
-"""Download BTC-USD price data from Yahoo Finance.
-
-Downloads daily price data for the date range found in daily_sentiment.csv,
-calculates daily returns, and saves to CSV.
-"""
-
 import yfinance as yf
 import pandas as pd
 
 
 def get_date_range(filepath: str) -> tuple[str, str]:
-    """Read daily_sentiment.csv and return min/max dates."""
     df = pd.read_csv(filepath)
     min_date = df['date'].min()
     max_date = df['date'].max()
@@ -17,10 +10,6 @@ def get_date_range(filepath: str) -> tuple[str, str]:
 
 
 def download_price_data(ticker: str, start_date: str, end_date: str) -> pd.DataFrame:
-    """Download price data from Yahoo Finance.
-
-    Note: yfinance end date is exclusive, so we add 1 day to include the last date.
-    """
     # Add one day to end_date to make it inclusive
     end_plus_one = pd.to_datetime(end_date) + pd.Timedelta(days=1)
     df = yf.download(ticker, start=start_date, end=end_plus_one, progress=False)
@@ -29,13 +18,11 @@ def download_price_data(ticker: str, start_date: str, end_date: str) -> pd.DataF
 
 
 def add_daily_return(df: pd.DataFrame) -> pd.DataFrame:
-    """Add daily_return column as percentage change in closing price."""
     df['daily_return'] = df['Close'].pct_change() * 100
     return df
 
 
 def save_data(df: pd.DataFrame, filepath: str) -> None:
-    """Save the price dataframe to CSV."""
     df.to_csv(filepath, index=False)
 
 

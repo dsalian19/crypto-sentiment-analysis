@@ -1,10 +1,7 @@
-"""Export tweets for manual labeling."""
-
 import pandas as pd
 
 
 def export_for_labeling():
-    """Export a sample of tweets for manual labeling."""
     input_path = "data/tweets_tagged.csv"
     output_path = "data/tweets_to_label.csv"
 

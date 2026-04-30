@@ -1,21 +1,13 @@
-"""Merge sentiment and price data on the date column.
-
-Loads daily_sentiment.csv and price_data.csv, merges them on date,
-drops rows with missing values, and saves the final dataset.
-"""
-
 import pandas as pd
 
 
 def load_sentiment_data(filepath: str) -> pd.DataFrame:
-    """Load daily sentiment data."""
     df = pd.read_csv(filepath)
     df['date'] = pd.to_datetime(df['date']).dt.date
     return df
 
 
 def load_price_data(filepath: str) -> pd.DataFrame:
-    """Load price data and standardize column names."""
     df = pd.read_csv(filepath, skiprows=[1])  # Skip second row (ticker labels)
     df['Date'] = pd.to_datetime(df['Date']).dt.date
     df = df.rename(columns={'Date': 'date'})
@@ -23,18 +15,15 @@ def load_price_data(filepath: str) -> pd.DataFrame:
 
 
 def merge_datasets(sentiment_df: pd.DataFrame, price_df: pd.DataFrame) -> pd.DataFrame:
-    """Merge sentiment and price data on the date column."""
     merged = pd.merge(sentiment_df, price_df, on='date', how='inner')
     return merged
 
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
-    """Drop any rows with missing values."""
     return df.dropna()
 
 
 def save_data(df: pd.DataFrame, filepath: str) -> None:
-    """Save the merged dataframe to CSV."""
     df.to_csv(filepath, index=False)
 
 

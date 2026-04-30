@@ -1,15 +1,7 @@
-"""Load and inspect the collected tweets dataset."""
-
 import pandas as pd
 
 
 def inspect_data(filepath: str = "data/tweets_raw.csv") -> None:
-    """
-    Load the tweets CSV file and print inspection information.
-
-    Args:
-        filepath: Path to the tweets CSV file.
-    """
     try:
         df = pd.read_csv(filepath)
     except FileNotFoundError:

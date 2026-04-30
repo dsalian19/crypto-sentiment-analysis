@@ -1,5 +1,3 @@
-"""Collect tweets from Twitter/X API using Tweepy."""
-
 import os
 from datetime import datetime, timedelta, timezone
 
@@ -9,7 +7,6 @@ import tweepy
 
 
 def collect_tweets():
-    """Collect tweets about Bitcoin using Twitter API v2 - 100 per day for last 40 days."""
     load_dotenv()
 
     bearer_token = os.getenv("TWITTER_BEARER_TOKEN")
@@ -18,8 +15,6 @@ def collect_tweets():
 
     client = tweepy.Client(bearer_token=bearer_token, wait_on_rate_limit=True)
 
-    # Query excludes: retweets, replies, and quote tweets
-    # Note: Promoted tweets are not returned by the standard search API
     query = "(Bitcoin OR BTC) lang:en -is:retweet -is:reply -is:quote"
 
     tweets_data = []
@@ -79,7 +74,7 @@ def collect_tweets():
     output_path = "data/tweets_raw.csv"
     df.to_csv(output_path, index=False)
 
-    print(f"\n[SUCCESS] Saved {len(df)} tweets to {output_path}")
+    print(f"\nSaved {len(df)} tweets to {output_path}")
     print(f"Shape: {df.shape}")
 
 

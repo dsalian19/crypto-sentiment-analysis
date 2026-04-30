@@ -1,43 +1,47 @@
-"""Clean and normalize tweet text."""
-
 import re
 
 import pandas as pd
 
 
 def clean_tweet_text(text: str) -> str:
-    """
-    Clean tweet text by removing URLs, mentions, cashtags, punctuation,
-    and normalizing whitespace.
-
-    Args:
-        text: Raw tweet text.
-
-    Returns:
-        Cleaned text.
-    """
     if not isinstance(text, str):
         return ""
-
     text = re.sub(r"http[s]?://\S+", "", text)
-
     text = re.sub(r"@\w+", "", text)
-
     text = re.sub(r"\$\w+", "", text)
-
     text = re.sub(r"#(\w+)", r"\1", text)
-
     text = re.sub(r"[^\w\s]", "", text)
-
     text = re.sub(r"\s+", " ", text)
-
     text = text.strip().lower()
-
     return text
 
 
+SPAM_KEYWORDS = [
+    "giveaway", "airdrop", "win", "click here", "join now",
+    "claim", "free", "promo", "discount", "follow us",
+    "dm us", "limited offer", "sign up", "register now",
+    "100x", "guaranteed", "profit"
+]
+
+
+def is_spam(text: str) -> bool:
+    if not isinstance(text, str):
+        return False
+    text_lower = text.lower()
+    return any(keyword in text_lower for keyword in SPAM_KEYWORDS)
+
+
+def filter_spam(df: pd.DataFrame) -> pd.DataFrame:
+    before = len(df)
+    df = df[~df["text"].apply(is_spam)]
+    after = len(df)
+    removed = before - after
+    print(f"Spam filter: removed {removed} tweets ({removed/before*100:.1f}%)")
+    print(f"Remaining tweets: {after}")
+    return df
+
+
 def clean_and_save():
-    """Load standardized tweets, clean text, and save."""
     input_path = "data/tweets_standardized.csv"
     output_path = "data/tweets_cleaned.csv"
 
@@ -56,7 +60,10 @@ def clean_and_save():
         print("Error: 'text' column not found in dataset")
         return
 
-    print("Cleaning tweet text...")
+    print("\nFiltering spam and bot tweets...")
+    df = filter_spam(df)
+
+    print("\nCleaning tweet text...")
     df["text_cleaned"] = df["text"].apply(clean_tweet_text)
 
     empty_after_cleaning = df["text_cleaned"].eq("").sum()
@@ -65,12 +72,7 @@ def clean_and_save():
 
     df.to_csv(output_path, index=False)
 
-    print(f"Saved {len(df)} cleaned tweets to {output_path}")
-    print("\nSample before/after:")
-    for i in range(min(3, len(df))):
-        print(f"  Original: {df['text'].iloc[i][:60]}...")
-        print(f"  Cleaned:  {df['text_cleaned'].iloc[i][:60]}...")
-        print()
+    print(f"\nSaved {len(df)} cleaned tweets to {output_path}")
 
 
 if __name__ == "__main__":

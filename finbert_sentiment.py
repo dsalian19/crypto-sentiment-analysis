@@ -1,22 +1,13 @@
-"""Apply FinBERT sentiment analysis to cleaned tweets.
-
-Loads tweets_cleaned.csv, applies the ProsusAI/finbert model using
-HuggingFace transformers pipeline, adds label and confidence columns,
-and saves the results.
-"""
-
 import pandas as pd
 from transformers import pipeline
 from tqdm import tqdm
 
 
 def load_data(filepath: str) -> pd.DataFrame:
-    """Load the cleaned tweets CSV."""
     return pd.read_csv(filepath)
 
 
 def create_finbert_pipeline():
-    """Create a FinBERT sentiment analysis pipeline."""
     return pipeline(
         "sentiment-analysis",
         model="ProsusAI/finbert",
@@ -26,7 +17,6 @@ def create_finbert_pipeline():
 
 
 def process_batch(classifier, texts: list) -> tuple[list, list]:
-    """Process a batch of texts and return labels and confidence scores."""
     results = classifier(texts, truncation=True, max_length=512)
     labels = [r["label"] for r in results]
     confidences = [r["score"] for r in results]
@@ -34,21 +24,10 @@ def process_batch(classifier, texts: list) -> tuple[list, list]:
 
 
 def apply_finbert(df: pd.DataFrame, classifier, batch_size: int = 32) -> pd.DataFrame:
-    """Apply FinBERT to the text_cleaned column in batches.
-
-    Args:
-        df: DataFrame with text_cleaned column
-        classifier: HuggingFace sentiment analysis pipeline
-        batch_size: Number of texts to process at once
-
-    Returns:
-        DataFrame with finbert_label and finbert_confidence columns
-    """
     texts = df["text_cleaned"].astype(str).tolist()
     all_labels = []
     all_confidences = []
 
-    # Process in batches with progress bar
     num_batches = (len(texts) + batch_size - 1) // batch_size
     for i in tqdm(range(0, len(texts), batch_size), total=num_batches, desc="Processing batches"):
         batch = texts[i:i + batch_size]
@@ -62,7 +41,6 @@ def apply_finbert(df: pd.DataFrame, classifier, batch_size: int = 32) -> pd.Data
 
 
 def save_data(df: pd.DataFrame, filepath: str) -> None:
-    """Save the dataframe with FinBERT results to CSV."""
     df.to_csv(filepath, index=False, encoding="utf-8")
 
 

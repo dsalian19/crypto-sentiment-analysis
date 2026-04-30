@@ -1,11 +1,8 @@
-"""Preprocess and standardize the tweets dataset."""
-
 import pandas as pd
 
 
-def preprocess_data():
-    """Load, clean, and standardize tweet data."""
-    input_path = "data/tweets_raw.csv"
+def preprocess_data(path):
+    input_path = path
     output_path = "data/tweets_standardized.csv"
 
     try:

@@ -1,9 +1,3 @@
-"""Fine-tune ProsusAI/finbert on manually labeled crypto tweets.
-
-Loads tweets_with_labels.csv, filters to labeled data, fine-tunes FinBERT
-with 80/20 train/validation split, and saves the model.
-"""
-
 import os
 import pandas as pd
 import torch
@@ -19,20 +13,15 @@ from datasets import Dataset
 
 
 def load_data(filepath: str) -> pd.DataFrame:
-    """Load labeled tweets and filter to rows with manual labels."""
     df = pd.read_csv(filepath)
     # Filter to rows with manual labels
     df = df[df["label"].notna()].copy()
-    # Map labels from -1, 0, 1 to 0, 1, 2 for model compatibility
-    # -1 (negative) -> 0, 0 (neutral) -> 1, 1 (positive) -> 2
     label_map = {-1.0: 0, 0.0: 1, 1.0: 2}
     df["label"] = df["label"].map(label_map).astype(int)
     return df
 
 
 def prepare_datasets(df: pd.DataFrame, tokenizer, test_size: float = 0.2):
-    """Split data and create HuggingFace Datasets."""
-    # Split into train and validation
     train_df, val_df = train_test_split(
         df,
         test_size=test_size,
@@ -40,11 +29,9 @@ def prepare_datasets(df: pd.DataFrame, tokenizer, test_size: float = 0.2):
         stratify=df["label"]
     )
 
-    # Create HuggingFace Datasets
     train_dataset = Dataset.from_pandas(train_df[["text_cleaned", "label"]])
     val_dataset = Dataset.from_pandas(val_df[["text_cleaned", "label"]])
 
-    # Tokenize function
     def tokenize_function(examples):
         return tokenizer(
             examples["text_cleaned"],
@@ -57,7 +44,6 @@ def prepare_datasets(df: pd.DataFrame, tokenizer, test_size: float = 0.2):
     train_dataset = train_dataset.map(tokenize_function, batched=True)
     val_dataset = val_dataset.map(tokenize_function, batched=True)
 
-    # Set format for PyTorch
     train_dataset = train_dataset.remove_columns(["text_cleaned"])
     val_dataset = val_dataset.remove_columns(["text_cleaned"])
     train_dataset.set_format("torch")
@@ -67,7 +53,6 @@ def prepare_datasets(df: pd.DataFrame, tokenizer, test_size: float = 0.2):
 
 
 def compute_metrics(eval_pred):
-    """Compute accuracy for evaluation."""
     predictions, labels = eval_pred
     predictions = torch.tensor(predictions).argmax(dim=-1)
     labels = torch.tensor(labels)

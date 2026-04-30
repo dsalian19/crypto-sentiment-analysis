@@ -1,9 +1,3 @@
-"""Correlation analysis between sentiment and BTC price returns.
-
-Loads merged_final.csv, filters for BTC data, computes Pearson correlations
-between sentiment metrics and daily returns, and generates a scatter plot.
-"""
-
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -11,18 +5,14 @@ from scipy.stats import pearsonr
 
 
 def load_data(filepath: str) -> pd.DataFrame:
-    """Load the merged dataset."""
     return pd.read_csv(filepath)
 
 
 def filter_btc(df: pd.DataFrame) -> pd.DataFrame:
-    """Filter to BTC-only data."""
     return df[df["coin"] == "BTC"].copy()
 
 
 def compute_correlation(x: pd.Series, y: pd.Series, name: str) -> tuple:
-    """Compute Pearson correlation and return coefficient + p-value."""
-    # Remove rows where either value is NaN
     mask = x.notna() & y.notna()
     x_clean = x[mask]
     y_clean = y[mask]
@@ -59,7 +49,6 @@ def main():
     print("CORRELATION ANALYSIS")
     print("=" * 60)
 
-    # Sentiment vs Daily Return
     corr_sentiment, p_val_sentiment = compute_correlation(
         df_btc["avg_compound"], df_btc["daily_return"], "Sentiment"
     )
@@ -68,8 +57,6 @@ def main():
         print(f"   Pearson r: {corr_sentiment:.4f}")
         print(f"   p-value:   {p_val_sentiment:.4f}")
         print(f"   Significance: {'Significant' if p_val_sentiment < 0.05 else 'Not significant'} (alpha=0.05)")
-
-    # Tweet Volume vs Daily Return
     corr_volume, p_val_volume = compute_correlation(
         df_btc["tweet_volume"], df_btc["daily_return"], "Tweet Volume"
     )
@@ -79,7 +66,6 @@ def main():
         print(f"   p-value:   {p_val_volume:.4f}")
         print(f"   Significance: {'Significant' if p_val_volume < 0.05 else 'Not significant'} (α=0.05)")
 
-    # Weighted Sentiment vs Daily Return
     corr_weighted, p_val_weighted = compute_correlation(
         df_btc["avg_weighted_sentiment"], df_btc["daily_return"], "Weighted Sentiment"
     )
@@ -88,10 +74,6 @@ def main():
         print(f"   Pearson r: {corr_weighted:.4f}")
         print(f"   p-value:   {p_val_weighted:.4f}")
         print(f"   Significance: {'Significant' if p_val_weighted < 0.05 else 'Not significant'} (α=0.05)")
-
-    print("\n" + "=" * 60)
-    print("INTERPRETATION")
-    print("=" * 60)
 
     if corr_sentiment is not None:
         strength = "strong" if abs(corr_sentiment) > 0.5 else "moderate" if abs(corr_sentiment) > 0.3 else "weak"
